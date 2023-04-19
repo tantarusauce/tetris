@@ -77,7 +77,10 @@ class tetris : Form
         gam.score = 0;
         gam.deletedRow = 0;
         scoreLabel = new Label();
-        scoreLabel.Dock = DockStyle.Top;
+        scoreLabel.Font = new Font("MS UI Gothic", 30);
+        scoreLabel.Size = new Size(600, 300);
+        scoreLabel.Location = new Point(30,30);
+        scoreLabel.BackColor = Color.Transparent;
         scoreLabel.Parent = this;
         loadImage();
         this.Paint += new PaintEventHandler(fm_Paint);
@@ -161,7 +164,7 @@ class tetris : Form
                 g.DrawImage(m.minoImage0[j, i], m.point.X + j * 30, m.point.Y + i * 30, 32, 32);
             }
         }
-        scoreLabel.Text = "Score:" + gam.score.ToString() + "\nDeletedRow:" + gam.deletedRow.ToString();
+        scoreLabel.Text = "\nScore:" + gam.score.ToString() + "\n\n\nDeletedRow:" + gam.deletedRow.ToString();
         g.DrawImage(scoreSheet, 30, 30, 600, 300);
         
     }
