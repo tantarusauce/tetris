@@ -2,19 +2,21 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.Diagnostics.Eventing.Reader;
 
 class tetris : Form
 {
     private Image[] img = new Image[16];
     private Image[,] bg = new Image[17, 24];
-    private Image backg, holdImg, scoreSheet;
-    private mino m;
-    private game gam;
+    private Image backg, holdImg, scoreSheet, bcgr;
+    private Mino m;
+    private Game gam;
     private Label scoreLabel;
     Random rn = new Random();
     private Image minom1img;
     private int timer = 0;
     private int rc = 0;
+    private int rct = 0;
     private int count = 0;
     private int[] a = { 1, 2, 3, 4, 5, 5, 4, 3, 2, 1 };
     System.Windows.Forms.Timer tm = new System.Windows.Forms.Timer();
@@ -33,8 +35,8 @@ class tetris : Form
         this.MaximizeBox = false;
         this.MinimizeBox = false;
         tm.Interval = 20;
-        m = new mino();
-        gam = new game();
+        m = new Mino();
+        gam = new Game();
         int[,] initMino = {{-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
                            {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
                            {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
@@ -77,6 +79,8 @@ class tetris : Form
         gam.score = 0;
         gam.deletedRow = 0;
         gam.level = 0;
+        gam.combo = 0;
+        gam.holded = false;
         scoreLabel = new Label();
         scoreLabel.Font = new Font("MS UI Gothic", 30);
         scoreLabel.Size = new Size(600, 300);
@@ -95,6 +99,7 @@ class tetris : Form
         minom1img = Image.FromFile(".\\resources\\mino_-1.png");
         scoreSheet = Image.FromFile(".\\resources\\scoreInd.png");
         backg = Image.FromFile(".\\resources\\background.png");
+        bcgr = Image.FromFile(".\\resources\\background0.png");
         holdImg = Image.FromFile(".\\resources\\hold.png");
         for (int i = 0; i <= 13; i++)
         {
@@ -169,7 +174,7 @@ class tetris : Form
                 d = m.deg;
                 if(gam.hold == -3)
                 {
-                    m.minoImageHold[j, i] = minom1img;
+                    m.minoImageHold[j, i] = backg;
                 }
                 else
                 {
@@ -179,7 +184,7 @@ class tetris : Form
                     }
                     else
                     {
-                        m.minoImageHold[j, i] = minom1img;
+                        m.minoImageHold[j, i] = backg;
                     }
                 }
                 
@@ -191,6 +196,7 @@ class tetris : Form
     {
         Point flm = m.fallingMino;
         Graphics g = e.Graphics;
+        //g.DrawImage(bcgr, 0, 0, 1280, 720);
         for (int j = 0; j < 24; j++)
         {
             for (int i = 0; i < 16; i++)
@@ -212,14 +218,23 @@ class tetris : Form
                 g.DrawImage(m.minoImage0[j, i], m.point.X + j * 30, m.point.Y + i * 30, 32, 32);
             }
         }
-        scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() + "\n\nLEVEL:" + gam.level.ToString();
+        if(!(gam.combo == 0))
+        {
+            scoreLabel.Text = "SCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
+            "\n\nLEVEL:" + gam.level.ToString() + "\n\nCOMBO:" + gam.combo.ToString();
+        }
+        else
+        {
+            scoreLabel.Text = "SCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
+            "\n\nLEVEL:" + gam.level.ToString();
+        }
         g.DrawImage(scoreSheet, 30, 30, 600, 300);
         g.DrawImage(holdImg, 500, 200, 128, 128);
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
-                g.DrawImage(m.minoImageHold[j, i], 530 + j * 15, 230 + i * 15, 16, 16);
+                g.DrawImage(m.minoImageHold[j, i], 535 + j * 15, 245 + i * 15, 16, 16);
             }
         }
     }
@@ -299,6 +314,13 @@ class tetris : Form
                     temp = gam.hold;
                     gam.hold = gam.kind;
                     gam.kind = temp;
+                }
+                if (gam.holded == false)
+                {
+                    m.fallingMino = new Point(6, 0);
+                    Point minop = new Point(740, -90);
+                    m.point = minop;
+                    gam.holded = true;
                 }
                 minoDeg();
             }
@@ -393,15 +415,23 @@ class tetris : Form
                     }
                 }
             });
-            loadImage();
+            gam.holded = false;
+            bgPaint();
             gam.kind = rn.Next(7);
             m.fallingMino = new Point(6, 0);
             m.point = new Point(740, -90);
             m.deg = 0;
             minoDeg();
+            rct = deleteRow();
+            rc = rct;
+            while (!(rct == 0))
+            {
+                rct = deleteRow();
+                rc += rct;
+            }
+            scoreCal(rc, gam.combo);
+            if (!(rc == 0)) gam.combo += 1;else gam.combo = 0;
         }
-        rc = deleteRow();
-        scoreCal(rc);
         if (gameOver()) tm.Stop();
         bgPaint();
         Invalidate();
@@ -414,22 +444,23 @@ class tetris : Form
         }
         return false;
     }
-    public void scoreCal(int rc)
+    public void scoreCal(int rc, int ratio)
     {
         gam.deletedRow += rc;
+        ratio++;
         switch(rc)
         {
             case 1:
-                gam.score += 10;
+                gam.score += 10 * ratio;
                 break;
             case 2:
-                gam.score += 100;
+                gam.score += 50 * ratio;
                 break;
             case 3:
-                gam.score += 500;
+                gam.score += 100 * ratio;
                 break;
             case 4:
-                gam.score += 1000;
+                gam.score += 500 * ratio;
                 break;
         }
 
@@ -722,7 +753,7 @@ class tetris : Form
         return j == 0 ? 0 : deleteRowR(j - 1);
     }
 }
-class game
+class Game
 {
     public int[,] placedMino = new int[17, 24];
     public int kind;
@@ -732,8 +763,10 @@ class game
     public int score;
     public int deletedRow;
     public int level;
+    public bool holded;
+    public int combo;
 }
-class mino
+class Mino
 {
     public Image[,] minoImage0 = new Image[4, 4];
     public Image[,] minoImage1 = new Image[4, 4];
@@ -828,9 +861,9 @@ class mino
 
         //Lミノ1
                                                         {{{0,0,0,0},
-                                                          {0,0,0,0},
                                                           {1,0,0,0},
-                                                          {1,1,1,0}},
+                                                          {1,1,1,0},
+                                                          {0,0,0,0}},
 
                                                          {{0,0,0,0},
                                                           {0,1,0,0},
@@ -843,16 +876,16 @@ class mino
                                                           {0,0,1,0}},
 
                                                          {{0,0,0,0},
-                                                          {1,1,0,0},
-                                                          {1,0,0,0},
-                                                          {1,0,0,0}}},
+                                                          {0,1,1,0},
+                                                          {0,1,0,0},
+                                                          {0,1,0,0}}},
 
 
         //Lミノ2
                                                         {{{0,0,0,0},
-                                                          {0,0,0,0},
                                                           {0,0,1,0},
-                                                          {1,1,1,0}},
+                                                          {1,1,1,0},
+                                                          {0,0,0,0}},
 
                                                          {{0,0,0,0},
                                                           {1,1,0,0},
@@ -865,31 +898,31 @@ class mino
                                                           {1,0,0,0}},
 
                                                          {{0,0,0,0},
-                                                          {1,0,0,0},
-                                                          {1,0,0,0},
-                                                          {1,1,0,0}}},
+                                                          {0,1,0,0},
+                                                          {0,1,0,0},
+                                                          {0,1,1,0}}},
 
 
 
                                                         {{{0,0,0,0},
-                                                          {0,0,0,0},
                                                           {0,1,0,0},
-                                                          {1,1,1,0}},
-
-                                                         {{0,0,0,0},
-                                                          {0,0,1,0},
-                                                          {0,1,1,0},
-                                                          {0,0,1,0}},
-
-                                                         {{0,0,0,0},
                                                           {1,1,1,0},
-                                                          {0,1,0,0},
                                                           {0,0,0,0}},
 
                                                          {{0,0,0,0},
-                                                          {1,0,0,0},
+                                                          {0,1,0,0},
                                                           {1,1,0,0},
-                                                          {1,0,0,0}}}};
+                                                          {0,1,0,0}},
+
+                                                         {{0,0,0,0},
+                                                          {0,0,0,0},
+                                                          {1,1,1,0},
+                                                          {0,1,0,0}},
+
+                                                         {{0,0,0,0},
+                                                          {0,1,0,0},
+                                                          {0,1,1,0},
+                                                          {0,1,0,0}}}};
     public int deg;
     public Point point;
     public Point fallingMino;
