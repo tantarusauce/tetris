@@ -7,12 +7,10 @@ class tetris : Form
 {
     private Image[] img = new Image[16];
     private Image[,] bg = new Image[17, 24];
-    private Image backg;
-    private Image scoreSheet;
+    private Image backg, holdImg, scoreSheet;
     private mino m;
     private game gam;
     private Label scoreLabel;
-    private Label rowLabel;
     Random rn = new Random();
     private Image minom1img;
     private int timer = 0;
@@ -73,9 +71,12 @@ class tetris : Form
         m.point = minop;
         gam.placedMino = initMino;
         gam.kind = rn.Next(7);
+        gam.hidHold = rn.Next(7);
+        gam.hold = -3;
         gam.veryfast = false;
         gam.score = 0;
         gam.deletedRow = 0;
+        gam.level = 0;
         scoreLabel = new Label();
         scoreLabel.Font = new Font("MS UI Gothic", 30);
         scoreLabel.Size = new Size(600, 300);
@@ -94,6 +95,7 @@ class tetris : Form
         minom1img = Image.FromFile(".\\resources\\mino_-1.png");
         scoreSheet = Image.FromFile(".\\resources\\scoreInd.png");
         backg = Image.FromFile(".\\resources\\background.png");
+        holdImg = Image.FromFile(".\\resources\\hold.png");
         for (int i = 0; i <= 13; i++)
         {
             img[i] = Image.FromFile(".\\resources\\mino_" + i + ".png");
@@ -160,6 +162,29 @@ class tetris : Form
                 }
             }
         }
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                d = m.deg;
+                if(gam.hold == -3)
+                {
+                    m.minoImageHold[j, i] = minom1img;
+                }
+                else
+                {
+                    if (m.minoShape[gam.hold, d, i, j] == 1)
+                    {
+                        m.minoImageHold[j, i] = img[gam.hold];
+                    }
+                    else
+                    {
+                        m.minoImageHold[j, i] = minom1img;
+                    }
+                }
+                
+            }
+        }
     }
 
     public void fm_Paint(Object sender, PaintEventArgs e)
@@ -177,19 +202,26 @@ class tetris : Form
         {
             for (int j = 0; j < 4; j++)
             {
-                g.DrawImage(m.minoImage0[j, i], m.point.X + j * 30, m.point.Y + i * 30, 32, 32);
+                g.DrawImage(m.minoImage1[j, i], m.point.X + j * 30,(flm.Y + i + fallShadow() - 4) * 30, 32, 32);
             }
         }
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
-                g.DrawImage(m.minoImage1[j, i], m.point.X + j * 30,(flm.Y + i + fallShadow() - 4) * 30, 32, 32);
+                g.DrawImage(m.minoImage0[j, i], m.point.X + j * 30, m.point.Y + i * 30, 32, 32);
             }
         }
-        scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "\n\n\nLINE(S):" + gam.deletedRow.ToString();
+        scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() + "\n\nLEVEL:" + gam.level.ToString();
         g.DrawImage(scoreSheet, 30, 30, 600, 300);
-        
+        g.DrawImage(holdImg, 500, 200, 128, 128);
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                g.DrawImage(m.minoImageHold[j, i], 530 + j * 15, 230 + i * 15, 16, 16);
+            }
+        }
     }
     public void fm_KeyDown(Object sender, KeyEventArgs e)
     {
@@ -251,6 +283,26 @@ class tetris : Form
             }
             minoDeg();
         }
+        else if (e.KeyCode == Keys.H)
+        {
+            if (holdOk())
+            {
+                //HOLD
+                if (gam.hold == -3)
+                {
+                    gam.hold = gam.kind;
+                    gam.kind = gam.hidHold;
+                }
+                else
+                {
+                    int temp;
+                    temp = gam.hold;
+                    gam.hold = gam.kind;
+                    gam.kind = temp;
+                }
+                minoDeg();
+            }
+        }
     }
 
     public void tm_Tick(Object sender, EventArgs e)
@@ -258,25 +310,70 @@ class tetris : Form
         if (lookBottom() == true)
         {
             int fallTick = 0;
-            if (gam.deletedRow < 10) fallTick = 20;
-            else if (gam.deletedRow < 20) fallTick = 15;
-            else if (gam.deletedRow < 30) fallTick = 10;
-            else if (gam.deletedRow < 40) fallTick = 5;
-            else if (gam.deletedRow < 50) fallTick = 0;
-            else if (gam.deletedRow < 60) 
+            if (gam.deletedRow < 10) gam.level = 0;
+            else if (gam.deletedRow < 20) gam.level = 1;
+            else if (gam.deletedRow < 30) gam.level = 2;
+            else if (gam.deletedRow < 40) gam.level = 3;
+            else if (gam.deletedRow < 50) gam.level = 4;
+            else if (gam.deletedRow < 60) gam.level = 5;
+            else if (gam.deletedRow < 70) gam.level = 6;
+            else if (gam.deletedRow < 80) gam.level = 7;
+            else if (gam.deletedRow < 90) gam.level = 8;
+            else if (gam.deletedRow < 100) gam.level = 9;
+            else if (gam.deletedRow < 110) gam.level = 10;
+            else if (gam.deletedRow < 120) gam.level = 11;
+            else if (gam.deletedRow < 130) gam.level = 12;
+            else if (gam.deletedRow < 140) gam.level = 13;
+            else gam.level = 14;
+            switch (gam.level)
             {
-                fallTick = 9;
-                gam.veryfast = true;
+                case 0:
+                    fallTick = 20;
+                    break;
+                case 1:
+                    fallTick = 15;
+                    break;
+                case 2:
+                    fallTick = 10;
+                    break;
+                case 3:
+                    fallTick = 5;
+                    break;
+                case 4:
+                    fallTick = 0;
+                    break;
+                case 5:
+                    gam.veryfast = true;
+                    fallTick = 9;
+                    break;
+                case 6:
+                    fallTick = 8;
+                    break;
+                case 7:
+                    fallTick = 7;
+                    break;
+                case 8:
+                    fallTick = 6;
+                    break;
+                case 9:
+                    fallTick = 5;
+                    break;
+                case 10:
+                    fallTick = 4;
+                    break;
+                case 11:
+                    fallTick = 3;
+                    break;
+                case 12:
+                    fallTick = 2;
+                    break;
+                case 13:
+                    fallTick = 1;
+                    break;
+                case 14:
+                    fallTick = 0;
+                    break;
             }
-            else if (gam.deletedRow < 70) fallTick = 8;
-            else if (gam.deletedRow < 80) fallTick = 7;
-            else if (gam.deletedRow < 90) fallTick = 6;
-            else if (gam.deletedRow < 100) fallTick = 5;
-            else if (gam.deletedRow < 110) fallTick = 4;
-            else if (gam.deletedRow < 120) fallTick = 3;
-            else if (gam.deletedRow < 130) fallTick = 2;
-            else if (gam.deletedRow < 140) fallTick = 1;
-            else fallTick = 0;
             fall(fallTick);
         }
         else
@@ -410,7 +507,6 @@ class tetris : Form
         }
         return rotateok;
     }
-
     public bool rotateleftOk()
     {
         Point flm = m.fallingMino;
@@ -453,6 +549,29 @@ class tetris : Form
                     if (m.minoShape[gam.kind, m.deg, j, i] == 1)
                     {
                         if (!(gam.placedMino[flm.Y + j + 1, flm.X + i] == -1 || gam.placedMino[flm.Y + j + 1, flm.X + i] == -3))
+                        {
+                            fallok = false;
+                        }
+                    }
+
+                }
+            }
+        });
+        return fallok;
+    }
+    public bool holdOk()
+    {
+        Point flm = m.fallingMino;
+        bool fallok = true;
+        Parallel.For(0, 8, id =>
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (m.minoShape[(gam.hold == -3) ? gam.hidHold: gam.hold, m.deg, j, i] == 1)
+                    {
+                        if (!(gam.placedMino[flm.Y + j, flm.X + i] == -1 || gam.placedMino[flm.Y + j, flm.X + i] == -3))
                         {
                             fallok = false;
                         }
@@ -607,14 +726,18 @@ class game
 {
     public int[,] placedMino = new int[17, 24];
     public int kind;
+    public int hold;
+    public int hidHold;
     public bool veryfast;
     public int score;
     public int deletedRow;
+    public int level;
 }
 class mino
 {
     public Image[,] minoImage0 = new Image[4, 4];
     public Image[,] minoImage1 = new Image[4, 4];
+    public Image[,] minoImageHold = new Image[4, 4];
     //Iミノ
     public int[,,,] minoShape = new int[7, 4, 4, 4]    {{{{0,0,0,0},
                                                           {0,0,0,0},
