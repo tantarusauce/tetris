@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.ComponentModel.Design;
 
 class tetris : Form
 {
@@ -12,7 +13,9 @@ class tetris : Form
     private Game gam;
     private Label titleLabel;
     private Label scoreLabel;
-    private Label STARTLabel;
+    private Label startLabel;
+    private Label retryLabel;
+    private Label exitLabel;
     Random rn = new Random();
     private Image minom1img;
     private int scene = -1;//-1:titleinit 0:title 1:None 2:gameinit 3:game 
@@ -22,6 +25,9 @@ class tetris : Form
     private int count = 0;
     private int timerCount = 0;
     private bool keysUp = false;
+    private bool startMouseEnter = false;
+    private bool retryMouseEnter = false;
+    private bool exitMouseEnter = false;
     private int[] a = { 1, 2, 3, 4, 5, 5, 4, 3, 2, 1 };
     System.Windows.Forms.Timer tm = new System.Windows.Forms.Timer();
 
@@ -66,155 +72,13 @@ class tetris : Form
         titleLabel.BackColor = Color.Transparent;
         titleLabel.Parent = this;
         titleLabel.Text = "　PCの性能がいいほど\n難易度が上がるテトリス";
-        STARTLabel = new Label();
-        STARTLabel.Font = new Font("MS UI Gothic", 50);
-        STARTLabel.Size = new Size(500, 100);
-        STARTLabel.Location = new Point(500, 500);
-        STARTLabel.BackColor = Color.Transparent;
-        STARTLabel.Parent = this;
-        STARTLabel.Text = "S T A R T";
-    }
-    public void init()
-    {
-        tm.Interval = 20;
-        m = new Mino();
-        gam = new Game();
-        int[,] initMino = {{-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
-                           {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
-                           {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
-                           {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
-                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
-                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
-                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}};
-        int d = 0;
-        int k = rn.Next(7);
-        m.deg = d;
-        m.fallingMino = new Point(6, 0);
-        Point minop = new Point(740, -90);
-        m.point = minop;
-        gam.placedMino = initMino;
-        gam.kind = rn.Next(7);
-        gam.hidHold = rn.Next(7);
-        gam.hold = -3;
-        gam.veryfast = false;
-        gam.score = 0;
-        gam.deletedRow = 0;
-        gam.level = 0;
-        gam.combo = 0;
-        gam.holded = false;
-        gam.tickCount = 0;
-        gam.fallTick = 0;
-        scoreLabel = new Label();
-        scoreLabel.Font = new Font("MS UI Gothic", 30);
-        scoreLabel.Size = new Size(600, 300);
-        scoreLabel.Location = new Point(30, 30);
-        scoreLabel.BackColor = Color.Transparent;
-        scoreLabel.Parent = this;
-        bgPaint();
-        minoDeg();
-    }
-    public void bgPaint()
-    {
-        for (int j = 0; j < 24; j++)
-        {
-            for (int i = 0; i < 16; i++)
-            {
-                switch (gam.placedMino[j, i])
-                {
-                    case -3:
-                        bg[i, j] = minom1img;
-                        break;
-                    case -2:
-                        bg[i, j] = minom1img;
-                        break;
-                    case -1:
-                        bg[i, j] = backg;
-                        break;
-                    default:
-                        bg[i, j] = img[gam.placedMino[j, i]];
-                        break;
-                }
-            }
-        }
-    }
-
-    public void minoDeg()
-    {
-        int d;
-        d = m.deg;
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                d = m.deg;
-                if (m.minoShape[gam.kind, d, i, j] == 1)
-                {
-                    m.minoImage0[j, i] = img[gam.kind];
-                }
-                else
-                {
-                    m.minoImage0[j, i] = minom1img;
-                }
-            }
-        }
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                d = m.deg;
-                if (m.minoShape[gam.kind, d, i, j] == 1)
-                {
-                    m.minoImage1[j, i] = img[gam.kind + 7];
-                }
-                else
-                {
-                    m.minoImage1[j, i] = minom1img;
-                }
-            }
-        }
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                d = m.deg;
-                if(gam.hold == -3)
-                {
-                    m.minoImageHold[j, i] = backg;
-                }
-                else
-                {
-                    if (m.minoShape[gam.hold, d, i, j] == 1)
-                    {
-                        m.minoImageHold[j, i] = img[gam.hold];
-                    }
-                    else
-                    {
-                        m.minoImageHold[j, i] = backg;
-                    }
-                }
-                
-            }
-        }
+        startLabel = new Label();
+        startLabel.Font = new Font("MS UI Gothic", 50);
+        startLabel.Size = new Size(500, 100);
+        startLabel.Location = new Point(500, 500);
+        startLabel.BackColor = Color.Transparent;
+        startLabel.Parent = this;
+        startLabel.Text = "S T A R T";
     }
     public void fm_Paint(Object sender, PaintEventArgs e)
     {
@@ -224,12 +88,12 @@ class tetris : Form
             case 0://title
                 g.DrawImage(bcgr, this.ClientRectangle);
                 g.DrawImage(scoreSheet, 280, 30, 700, 300);
-                
+                int transp = startMouseEnter ? 7 : 0;
                 for (int j = 0; j < 5; j++)
                 {
-                    g.DrawImage(img[0], j * 60 + 500, 500, 64, 64);
+                    g.DrawImage(img[transp], j * 60 + 500, 500, 64, 64);
                 }
-                
+
                 break;
 
             case 3://gameloop
@@ -292,8 +156,79 @@ class tetris : Form
                     }
                 }
                 break;
+            case 5:
+                flm = m.fallingMino;
+                g.DrawImage(bcgr, this.ClientRectangle);
+                for (int j = 0; j < 24; j++)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        g.DrawImage(bg[i, j], 560 + i * 30, j * 30 - 30 * 3, 32, 32);
+                    }
+                }
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        g.DrawImage(m.minoImage1[j, i], m.point.X + j * 30, (flm.Y + i + fallShadow() - 4) * 30, 32, 32);
+                    }
+                }
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        g.DrawImage(m.minoImage0[j, i], m.point.X + j * 30, m.point.Y + i * 30, 32, 32);
+                    }
+                }
+                if (!(gam.combo == 0))
+                {
+                    if (gam.score != 0)
+                    {
+                        scoreLabel.Text = "SCORE:" + gam.score.ToString() + "0\n\nLINE(S):" + gam.deletedRow.ToString() +
+                    "\n\nLEVEL:" + gam.level.ToString() + "\n\nCOMBO:" + gam.combo.ToString();
+                    }
+                    else
+                    {
+                        scoreLabel.Text = "SCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
+                    "\n\nLEVEL:" + gam.level.ToString() + "\n\nCOMBO:" + gam.combo.ToString();
+                    }
+                }
+                else
+                {
+                    if (gam.score != 0)
+                    {
+                        scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "0\n\nLINE(S):" + gam.deletedRow.ToString() +
+                            "\n\nLEVEL:" + gam.level.ToString();
+                    }
+                    else
+                    {
+                        scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
+                            "\n\nLEVEL:" + gam.level.ToString();
+                    }
+                }
+                g.DrawImage(scoreSheet, 30, 30, 600, 300);
+                g.DrawImage(holdImg, 500, 200, 128, 128);
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        g.DrawImage(m.minoImageHold[j, i], 535 + j * 15, 245 + i * 15, 16, 16);
+                    }
+                }
+                int transp1 = retryMouseEnter ? 8 : 1;
+                int transp2 = exitMouseEnter ? 9 : 2;
+                for (int j = 0; j < 5; j++)
+                {
+                    g.DrawImage(img[transp1], j * 60 + 600, 240, 64, 64);
+                }
+                for (int j = 0; j < 4; j++)
+                {
+                    g.DrawImage(img[transp2], j * 55 + 640, 480, 60, 60);
+                }
+                break;
+
         }
-        
+
     }
     public void fm_KeyDown(Object sender, KeyEventArgs e)
     {
@@ -383,6 +318,199 @@ class tetris : Form
             }
         }
     }
+    public void fm_MouseEnter(Object sender, EventArgs e)
+    {
+        startMouseEnter = true;
+    }
+    public void fm_MouseLeave(Object sender, EventArgs e)
+    {
+        startMouseEnter = false;
+    }
+    public void fm_MouseClick(Object sender, EventArgs e)
+    {
+        scene = 2;
+    }
+    public void retry_MouseEnter(Object sender, EventArgs e)
+    {
+        retryMouseEnter = true;
+    }
+    public void retry_MouseLeave(Object sender, EventArgs e)
+    {
+        retryMouseEnter = false;
+    }
+    public void retry_MouseClick(Object sender, EventArgs e)
+    {
+        scene = 1;
+    }
+    public void exit_MouseEnter(Object sender, EventArgs e)
+    {
+        exitMouseEnter = true;
+    }
+    public void exit_MouseLeave(Object sender, EventArgs e)
+    {
+        exitMouseEnter = false;
+    }
+    public void exit_MouseClick(Object sender, EventArgs e)
+    {
+        scene = -2;
+    }
+    public void gameDispose()
+    {
+        scoreLabel.Dispose();
+        exitLabel.Dispose();
+        retryLabel.Dispose();
+    }
+    public void titleLoop()
+    {
+        startLabel.MouseEnter += new EventHandler(fm_MouseEnter);
+        startLabel.MouseLeave += new EventHandler(fm_MouseLeave);
+        startLabel.MouseClick += new MouseEventHandler(fm_MouseClick);
+    }
+    public void init()
+    {
+        tm.Interval = 20;
+        titleLabel.Dispose();
+        startLabel.Dispose();
+        m = new Mino();
+        gam = new Game();
+        int[,] initMino = {{-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
+                           {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
+                           {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
+                           {-2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
+                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
+                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
+                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}};
+        int d = 0;
+        int k = rn.Next(7);
+        m.deg = d;
+        m.fallingMino = new Point(6, 0);
+        Point minop = new Point(740, -90);
+        m.point = minop;
+        gam.placedMino = initMino;
+        gam.kind = rn.Next(7);
+        gam.hidHold = rn.Next(7);
+        gam.hold = -3;
+        gam.veryfast = false;
+        gam.score = 0;
+        gam.deletedRow = 0;
+        gam.level = 0;
+        gam.combo = 0;
+        gam.holded = false;
+        gam.tickCount = 0;
+        gam.fallTick = 0;
+        scoreLabel = new Label();
+        scoreLabel.Font = new Font("MS UI Gothic", 30);
+        scoreLabel.Size = new Size(500, 300);
+        scoreLabel.Location = new Point(30, 30);
+        scoreLabel.BackColor = Color.Transparent;
+        scoreLabel.Parent = this;
+        bgPaint();
+        minoDeg();
+    }
+    public void bgPaint()
+    {
+        for (int j = 0; j < 24; j++)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                switch (gam.placedMino[j, i])
+                {
+                    case -3:
+                        bg[i, j] = minom1img;
+                        break;
+                    case -2:
+                        bg[i, j] = minom1img;
+                        break;
+                    case -1:
+                        bg[i, j] = backg;
+                        break;
+                    default:
+                        bg[i, j] = img[gam.placedMino[j, i]];
+                        break;
+                }
+            }
+        }
+    }
+
+    public void minoDeg()
+    {
+        int d;
+        d = m.deg;
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                d = m.deg;
+                if (m.minoShape[gam.kind, d, i, j] == 1)
+                {
+                    m.minoImage0[j, i] = img[gam.kind];
+                }
+                else
+                {
+                    m.minoImage0[j, i] = minom1img;
+                }
+            }
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                d = m.deg;
+                if (m.minoShape[gam.kind, d, i, j] == 1)
+                {
+                    m.minoImage1[j, i] = img[gam.kind + 7];
+                }
+                else
+                {
+                    m.minoImage1[j, i] = minom1img;
+                }
+            }
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                d = m.deg;
+                if(gam.hold == -3)
+                {
+                    m.minoImageHold[j, i] = backg;
+                }
+                else
+                {
+                    if (m.minoShape[gam.hold, d, i, j] == 1)
+                    {
+                        m.minoImageHold[j, i] = img[gam.hold];
+                    }
+                    else
+                    {
+                        m.minoImageHold[j, i] = backg;
+                    }
+                }
+                
+            }
+        }
+    }
+
     public void gameLoop()
     {
         if (gam.tickCount != 2)
@@ -509,19 +637,27 @@ class tetris : Form
                 timerCount++;
             }
         }
-        if (gameOver()) tm.Stop();
+        if (gameOver()) scene = 4;
         bgPaint();
     }
     public void tm_Tick(Object sender, EventArgs e)
     {
         switch (scene)
         {
+            case -2:
+                gameDispose();
+                scene = -1;
+                break;
             case -1:
                 titleInit();
                 scene = 0;
                 break;
             case 0:
-                
+                titleLoop();
+                break;
+            case 1:
+                gameDispose();
+                scene = -1;
                 break;
             case 2:
                 init();
@@ -530,8 +666,41 @@ class tetris : Form
             case 3:
                 gameLoop();
                 break;
+            case 4:
+                gameOverInit();
+                scene = 5;
+                break;
+            case 5:
+                gameOverLoop();
+                break;
         }
         Invalidate();
+    }
+    public void gameOverInit()
+    {
+        retryLabel = new Label();
+        retryLabel.Font = new Font("MS UI Gothic", 50);
+        retryLabel.Size = new Size(400, 100);
+        retryLabel.Location = new Point(600, 240);
+        retryLabel.BackColor = Color.Transparent;
+        retryLabel.Parent = this;
+        retryLabel.Text = "R E T R Y";
+        exitLabel = new Label();
+        exitLabel.Font = new Font("MS UI Gothic", 50);
+        exitLabel.Size = new Size(400, 100);
+        exitLabel.Location = new Point(600, 480);
+        exitLabel.BackColor = Color.Transparent;
+        exitLabel.Parent = this;
+        exitLabel.Text = "  E X I T ";
+    }
+    public void gameOverLoop()
+    {
+        exitLabel.MouseEnter += new EventHandler(exit_MouseEnter);
+        exitLabel.MouseLeave += new EventHandler(exit_MouseLeave);
+        exitLabel.MouseClick += new MouseEventHandler(exit_MouseClick);
+        retryLabel.MouseEnter += new EventHandler(retry_MouseEnter);
+        retryLabel.MouseLeave += new EventHandler(retry_MouseLeave);
+        retryLabel.MouseClick += new MouseEventHandler(retry_MouseClick);
     }
     public bool gameOver()
     {

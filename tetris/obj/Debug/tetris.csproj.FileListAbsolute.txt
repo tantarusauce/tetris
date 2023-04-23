@@ -50,3 +50,11 @@ C:\Users\kyuur\OneDrive\ドキュメント\GitHub\tetris\tetris\obj\Debug\tetris
 C:\Users\kyuur\OneDrive\ドキュメント\GitHub\tetris\tetris\obj\Debug\tetris.csproj.CoreCompileInputs.cache
 C:\Users\kyuur\OneDrive\ドキュメント\GitHub\tetris\tetris\obj\Debug\tetris.exe
 C:\Users\kyuur\OneDrive\ドキュメント\GitHub\tetris\tetris\obj\Debug\tetris.pdb
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\bin\Debug\tetris.exe.config
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\bin\Debug\tetris.exe
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\bin\Debug\tetris.pdb
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\obj\Debug\tetris.csproj.AssemblyReference.cache
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\obj\Debug\tetris.csproj.SuggestedBindingRedirects.cache
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\obj\Debug\tetris.csproj.CoreCompileInputs.cache
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\obj\Debug\tetris.exe
+C:\Users\kyuur\Documents\GitHub\tetris\tetris\obj\Debug\tetris.pdb
