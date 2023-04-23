@@ -2,8 +2,6 @@
 using System.Windows.Forms;
 using System.Drawing;
 using System.Threading.Tasks;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing.Drawing2D;
 
 class tetris : Form
 {
@@ -12,9 +10,12 @@ class tetris : Form
     private Image backg, holdImg, scoreSheet, bcgr;
     private Mino m;
     private Game gam;
+    private Label titleLabel;
     private Label scoreLabel;
+    private Label STARTLabel;
     Random rn = new Random();
     private Image minom1img;
+    private int scene = -1;//-1:titleinit 0:title 1:None 2:gameinit 3:game 
     private int timer = 0;
     private int rc = 0;
     private int rct = 0;
@@ -37,6 +38,44 @@ class tetris : Form
         this.FormBorderStyle = FormBorderStyle.FixedSingle;
         this.MaximizeBox = false;
         this.MinimizeBox = false;
+        this.Paint += new PaintEventHandler(fm_Paint);
+        this.KeyDown += new KeyEventHandler(fm_KeyDown);
+        tm.Tick += new EventHandler(tm_Tick);
+        tm.Start();
+    }
+
+    public void loadImage()
+    {
+        minom1img = Image.FromFile(".\\resources\\mino_-1.png");
+        scoreSheet = Image.FromFile(".\\resources\\scoreInd.png");
+        backg = Image.FromFile(".\\resources\\background.png");
+        bcgr = Image.FromFile(".\\resources\\background0.png");
+        holdImg = Image.FromFile(".\\resources\\hold.png");
+        for (int i = 0; i <= 13; i++)
+        {
+            img[i] = Image.FromFile(".\\resources\\mino_" + i + ".png");
+        }
+    }
+    public void titleInit()
+    {
+        loadImage();
+        titleLabel = new Label();
+        titleLabel.Font = new Font("MS UI Gothic", 50);
+        titleLabel.Size = new Size(1280, 400);
+        titleLabel.Location = new Point(300, 100);
+        titleLabel.BackColor = Color.Transparent;
+        titleLabel.Parent = this;
+        titleLabel.Text = "　PCの性能がいいほど\n難易度が上がるテトリス";
+        STARTLabel = new Label();
+        STARTLabel.Font = new Font("MS UI Gothic", 50);
+        STARTLabel.Size = new Size(500, 100);
+        STARTLabel.Location = new Point(500, 500);
+        STARTLabel.BackColor = Color.Transparent;
+        STARTLabel.Parent = this;
+        STARTLabel.Text = "S T A R T";
+    }
+    public void init()
+    {
         tm.Interval = 20;
         m = new Mino();
         gam = new Game();
@@ -66,8 +105,7 @@ class tetris : Form
                            {-2, -2, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2},
                            {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
                            {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2},
-                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}
-        };
+                           {-2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}};
         int d = 0;
         int k = rn.Next(7);
         m.deg = d;
@@ -89,27 +127,9 @@ class tetris : Form
         scoreLabel = new Label();
         scoreLabel.Font = new Font("MS UI Gothic", 30);
         scoreLabel.Size = new Size(600, 300);
-        scoreLabel.Location = new Point(30,30);
+        scoreLabel.Location = new Point(30, 30);
         scoreLabel.BackColor = Color.Transparent;
         scoreLabel.Parent = this;
-        this.Paint += new PaintEventHandler(fm_Paint);
-        this.KeyDown += new KeyEventHandler(fm_KeyDown);
-        tm.Tick += new EventHandler(tm_Tick);
-        loadImage();
-        tm.Start();
-    }
-
-    public void loadImage()
-    {
-        minom1img = Image.FromFile(".\\resources\\mino_-1.png");
-        scoreSheet = Image.FromFile(".\\resources\\scoreInd.png");
-        backg = Image.FromFile(".\\resources\\background.png");
-        bcgr = Image.FromFile(".\\resources\\background0.png");
-        holdImg = Image.FromFile(".\\resources\\hold.png");
-        for (int i = 0; i <= 13; i++)
-        {
-            img[i] = Image.FromFile(".\\resources\\mino_" + i + ".png");
-        }
         bgPaint();
         minoDeg();
     }
@@ -198,65 +218,82 @@ class tetris : Form
     }
     public void fm_Paint(Object sender, PaintEventArgs e)
     {
-        Point flm = m.fallingMino;
         Graphics g = e.Graphics;
-        g.DrawImage(bcgr, this.ClientRectangle);
-        for (int j = 0; j < 24; j++)
+        switch (scene)
         {
-            for (int i = 0; i < 16; i++)
-            {
-                g.DrawImage(bg[i, j], 560 + i * 30, j * 30 - 30 * 3, 32, 32);
-            }
+            case 0://title
+                g.DrawImage(bcgr, this.ClientRectangle);
+                g.DrawImage(scoreSheet, 280, 30, 700, 300);
+                
+                for (int j = 0; j < 5; j++)
+                {
+                    g.DrawImage(img[0], j * 60 + 500, 500, 64, 64);
+                }
+                
+                break;
+
+            case 3://gameloop
+                Point flm = m.fallingMino;
+                g.DrawImage(bcgr, this.ClientRectangle);
+                for (int j = 0; j < 24; j++)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        g.DrawImage(bg[i, j], 560 + i * 30, j * 30 - 30 * 3, 32, 32);
+                    }
+                }
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        g.DrawImage(m.minoImage1[j, i], m.point.X + j * 30, (flm.Y + i + fallShadow() - 4) * 30, 32, 32);
+                    }
+                }
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        g.DrawImage(m.minoImage0[j, i], m.point.X + j * 30, m.point.Y + i * 30, 32, 32);
+                    }
+                }
+                if (!(gam.combo == 0))
+                {
+                    if (gam.score != 0)
+                    {
+                        scoreLabel.Text = "SCORE:" + gam.score.ToString() + "0\n\nLINE(S):" + gam.deletedRow.ToString() +
+                    "\n\nLEVEL:" + gam.level.ToString() + "\n\nCOMBO:" + gam.combo.ToString();
+                    }
+                    else
+                    {
+                        scoreLabel.Text = "SCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
+                    "\n\nLEVEL:" + gam.level.ToString() + "\n\nCOMBO:" + gam.combo.ToString();
+                    }
+                }
+                else
+                {
+                    if (gam.score != 0)
+                    {
+                        scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "0\n\nLINE(S):" + gam.deletedRow.ToString() +
+                            "\n\nLEVEL:" + gam.level.ToString();
+                    }
+                    else
+                    {
+                        scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
+                            "\n\nLEVEL:" + gam.level.ToString();
+                    }
+                }
+                g.DrawImage(scoreSheet, 30, 30, 600, 300);
+                g.DrawImage(holdImg, 500, 200, 128, 128);
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        g.DrawImage(m.minoImageHold[j, i], 535 + j * 15, 245 + i * 15, 16, 16);
+                    }
+                }
+                break;
         }
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                g.DrawImage(m.minoImage1[j, i], m.point.X + j * 30,(flm.Y + i + fallShadow() - 4) * 30, 32, 32);
-            }
-        }
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                g.DrawImage(m.minoImage0[j, i], m.point.X + j * 30, m.point.Y + i * 30, 32, 32);
-            }
-        }
-        if(!(gam.combo == 0))
-        {
-            if (gam.score != 0)
-            {
-                scoreLabel.Text = "SCORE:" + gam.score.ToString() + "0\n\nLINE(S):" + gam.deletedRow.ToString() +
-            "\n\nLEVEL:" + gam.level.ToString() + "\n\nCOMBO:" + gam.combo.ToString();
-            }
-            else
-            {
-                scoreLabel.Text = "SCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
-            "\n\nLEVEL:" + gam.level.ToString() + "\n\nCOMBO:" + gam.combo.ToString();
-            }
-        }
-        else
-        {
-            if (gam.score != 0)
-            {
-                scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "0\n\nLINE(S):" + gam.deletedRow.ToString() +
-                    "\n\nLEVEL:" + gam.level.ToString();
-            }
-            else
-            {
-                scoreLabel.Text = "\nSCORE:" + gam.score.ToString() + "\n\nLINE(S):" + gam.deletedRow.ToString() +
-                    "\n\nLEVEL:" + gam.level.ToString();
-            }
-        }
-        g.DrawImage(scoreSheet, 30, 30, 600, 300);
-        g.DrawImage(holdImg, 500, 200, 128, 128);
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                g.DrawImage(m.minoImageHold[j, i], 535 + j * 15, 245 + i * 15, 16, 16);
-            }
-        }
+        
     }
     public void fm_KeyDown(Object sender, KeyEventArgs e)
     {
@@ -319,7 +356,7 @@ class tetris : Form
             }
             minoDeg();
         }
-        else if (e.KeyCode == Keys.H)
+        else if (e.KeyCode == Keys.C)
         {
             if (holdOk())
             {
@@ -346,10 +383,9 @@ class tetris : Form
             }
         }
     }
-
-    public void tm_Tick(Object sender, EventArgs e)
+    public void gameLoop()
     {
-        if(gam.tickCount  != 2)
+        if (gam.tickCount != 2)
         {
             gam.tickCount += 1;
         }
@@ -373,19 +409,19 @@ class tetris : Form
             switch (gam.level)
             {
                 case 0:
-                    gam.fallTick = 14;
+                    gam.fallTick = 20;
                     break;
                 case 1:
-                    gam.fallTick = 13;
+                    gam.fallTick = 15;
                     break;
                 case 2:
-                    gam.fallTick = 12;
+                    gam.fallTick = 10;
                     break;
                 case 3:
-                    gam.fallTick = 11;
+                    gam.fallTick = 5;
                     break;
                 case 4:
-                    gam.fallTick = 10;
+                    gam.fallTick = 0;
                     break;
                 case 5:
                     gam.veryfast = true;
@@ -475,6 +511,26 @@ class tetris : Form
         }
         if (gameOver()) tm.Stop();
         bgPaint();
+    }
+    public void tm_Tick(Object sender, EventArgs e)
+    {
+        switch (scene)
+        {
+            case -1:
+                titleInit();
+                scene = 0;
+                break;
+            case 0:
+                
+                break;
+            case 2:
+                init();
+                scene = 3;
+                break;
+            case 3:
+                gameLoop();
+                break;
+        }
         Invalidate();
     }
     public bool gameOver()
