@@ -418,6 +418,8 @@ class tetris : Form
         gam.holded = false;
         gam.tickCount = 0;
         gam.fallTick = 0;
+        int[] initDRN = {-1, -1, -1, -1};
+        gam.deletedRowNum = initDRN;
         scoreLabel = new Label();
         scoreLabel.Font = new Font("MS UI Gothic", 30);
         scoreLabel.Size = new Size(500, 300);
@@ -1033,6 +1035,7 @@ class Game
     public int combo;
     public int tickCount;
     public int fallTick;
+    public int[] deletedRowNum = new int[4];
 }
 class Mino
 {
